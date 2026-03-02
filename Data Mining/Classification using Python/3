@@ -1,0 +1,90 @@
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from itertools import product
+
+def find_best_kernel(kernel_list, X, y, test_size=0.2, random_state=0):
+    """
+    Finds the best kernel for an SVM model using a single validation split.
+
+    Parameters:
+    - kernel_list (list): List of kernel names to test (e.g., ['linear', 'poly', 'rbf', 'sigmoid'])
+    - X (array-like): Feature matrix
+    - y (array-like): Target labels
+    - test_size (float): Proportion of the dataset to use as the test set (default = 0.2)
+    - random_state (int): Random seed for reproducibility (default = 0)
+
+    Returns:
+    - best_kernel (str): The kernel with the highest validation accuracy
+    - best_score (float): The highest validation accuracy
+    """
+    # Split the dataset into training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+    best_score = 0
+    best_kernel = None
+
+    # Iterate over each kernel in the kernel list
+    for kernel in kernel_list:
+        # Train the SVM model with the current kernel
+        model = SVC(kernel=kernel)
+        model.fit(X_train, y_train)
+
+        # Make predictions on the test set
+        y_pred = model.predict(X_test)
+
+        # Calculate accuracy
+        accuracy = accuracy_score(y_test, y_pred)
+
+        # Update the best kernel and score if the current accuracy is higher
+        if accuracy > best_score:
+            best_score = accuracy
+            best_kernel = kernel
+
+    return best_kernel, best_score
+
+def find_best_svm_params(param_dict, X, y, test_size=0.2, random_state=0):
+    """
+    Finds the best hyperparameter combination for an SVM model.
+
+    Parameters:
+    - param_dict (dict): Dictionary of hyperparameters to test (e.g., {'C': [1, 10], 'gamma': [0.1, 0.01]})
+    - X (array-like): Feature matrix
+    - y (array-like): Target labels
+    - test_size (float): Proportion of the dataset to use as the test set (default = 0.2)
+    - random_state (int): Random seed for reproducibility (default = 0)
+
+    Returns:
+    - best_params (dict): The best-performing hyperparameter set
+    - best_score (float): The highest validation accuracy
+    """
+    # Split the dataset into training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+    best_score = 0
+    best_params = None
+
+    # Generate all possible hyperparameter combinations
+    param_combinations = product(*param_dict.values())
+
+    # Iterate over each parameter combination
+    for params in param_combinations:
+        # Create a dictionary for the current parameter set
+        param_set = dict(zip(param_dict.keys(), params))
+
+        # Train the SVM model with the current parameter set
+        model = SVC(**param_set)
+        model.fit(X_train, y_train)
+
+        # Make predictions on the test set
+        y_pred = model.predict(X_test)
+
+        # Calculate accuracy
+        accuracy = accuracy_score(y_test, y_pred)
+
+        # Update the best parameters and score if the current accuracy is higher
+        if accuracy > best_score:
+            best_score = accuracy
+            best_params = param_set
+
+    return best_params, best_score
