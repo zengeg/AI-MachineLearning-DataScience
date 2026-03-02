@@ -1,0 +1,70 @@
+import numpy as np
+
+
+def create_lagged_features(x, exogenous, lag=3):
+    """
+    Creates lagged features and merges them with exogenous variables.
+
+    Parameters
+    ----------
+    x : ndarray of shape (n_timestep, )
+        The time series data.
+    exogenous : ndarray of shape (n_timestep, n_variables)
+        The exogenous variables.
+    lag : int, optional
+        The number of lagged features to create, by default 3.
+
+    Returns
+    -------
+    X : ndarray of shape (n_samples, lag + n_variables)
+        The feature matrix containing lagged features and exogenous variables.
+    y : ndarray of shape (n_samples, )
+        The target values.
+    """
+    X, y = [], []
+    for i in range(len(x) - lag):
+        # Extract lagged features
+        lagged_features = x[i:i + lag]
+        # Extract exogenous variables for the current timestep
+        exogenous_features = exogenous[i]  # Use i to align with x[i]
+        # Combine lagged features and exogenous variables
+        combined_features = np.concatenate((lagged_features, exogenous_features))
+        X.append(combined_features)
+        y.append(x[i + lag])
+
+    return np.asarray(X), np.asarray(y)
+
+
+def iterative_forecast(reg, last_known, last_known_exogenous, steps):
+    """
+    Iteratively forecasts future values using a trained regression model.
+
+    Parameters
+    ----------
+    reg : object
+        A trained regression model with a `predict` method.
+    last_known : ndarray of shape (lag, )
+        The last known lagged values of the time series.
+    last_known_exogenous : ndarray of shape (n_variables, )
+        The last known exogenous variables.
+    steps : int
+        The number of steps to forecast.
+
+    Returns
+    -------
+    ndarray of shape (steps, )
+        The forecasted values.
+    """
+    forecast = []
+    window = list(last_known)
+    for _ in range(steps):
+        # Combine the lagged features with the last known exogenous variables
+        combined_features = np.concatenate((window, last_known_exogenous))
+        # Predict the next value
+        next_value = reg.predict([combined_features])[0]
+        forecast.append(next_value)
+        # Update the window with the predicted value
+        window.pop(0)
+        window.append(next_value)
+
+    return np.array(forecast)
