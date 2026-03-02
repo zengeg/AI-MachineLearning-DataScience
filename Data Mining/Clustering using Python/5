@@ -1,0 +1,30 @@
+# Task 5: Run clustering algorithms and compute evaluation metrics
+kmeans_labels_spherical = kmeans(spherical_data, k=3)
+kmeans_labels_nonspherical = kmeans(nonspherical_data, k=2)
+agglomerative_labels_spherical = agglomerative_clustering(spherical_data, k=3)
+agglomerative_labels_nonspherical = agglomerative_clustering(nonspherical_data, k=2)
+
+# Compute silhouette scores
+silhouette_kmeans_spherical = silhouette_score(spherical_data, kmeans_labels_spherical)
+silhouette_kmeans_nonspherical = silhouette_score(nonspherical_data, kmeans_labels_nonspherical)
+silhouette_agglomerative_spherical = silhouette_score(spherical_data, agglomerative_labels_spherical)
+silhouette_agglomerative_nonspherical = silhouette_score(nonspherical_data, agglomerative_labels_nonspherical)
+
+# Compute purity scores
+purity_kmeans_spherical = purity_score(spherical_labels, kmeans_labels_spherical)
+purity_kmeans_nonspherical = purity_score(nonspherical_labels, kmeans_labels_nonspherical)
+purity_agglomerative_spherical = purity_score(spherical_labels, agglomerative_labels_spherical)
+purity_agglomerative_nonspherical = purity_score(nonspherical_labels, agglomerative_labels_nonspherical)
+
+# Print results
+print("Silhouette Scores:")
+print(f"KMeans Spherical: {silhouette_kmeans_spherical}")
+print(f"KMeans Non-Spherical: {silhouette_kmeans_nonspherical}")
+print(f"Agglomerative Spherical: {silhouette_agglomerative_spherical}")
+print(f"Agglomerative Non-Spherical: {silhouette_agglomerative_nonspherical}")
+
+print("\nPurity Scores:")
+print(f"KMeans Spherical: {purity_kmeans_spherical}")
+print(f"KMeans Non-Spherical: {purity_kmeans_nonspherical}")
+print(f"Agglomerative Spherical: {purity_agglomerative_spherical}")
+print(f"Agglomerative Non-Spherical: {purity_agglomerative_nonspherical}")
