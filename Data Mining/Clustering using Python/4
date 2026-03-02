@@ -1,0 +1,52 @@
+import numpy as np
+from sklearn import metrics
+from sklearn.metrics import pairwise_distances
+
+#Internal Evaluation using Silhouette score
+
+def silhouette_score(X, labels):
+    """Computes silhouette score for clustering."""
+    distances = pairwise_distances(X)  # Compute pairwise distances
+    unique_labels = np.unique(labels)  # Get unique cluster labels
+    
+    # Compute intra-cluster distance (a)
+    a = []
+    for i in range(len(X)):
+        same_cluster = labels == labels[i]
+        intra_distances = distances[i][same_cluster]  # Get distances to same cluster points
+        avg_distance = np.mean(intra_distances) if intra_distances.size > 1 else 0
+        a.append(avg_distance)
+    a = np.array(a)
+    
+    # Compute nearest-cluster distance (b)
+    b = []
+    for i in range(len(X)):
+        other_cluster_distances = []
+        for l in unique_labels:
+            if l != labels[i]:  # Skip same cluster
+                other_cluster_mask = labels == l
+                cluster_distances = distances[i][other_cluster_mask]
+                if cluster_distances.size > 0:
+                    avg_distance = np.mean(cluster_distances)
+                    other_cluster_distances.append(avg_distance)
+        
+        # Handle the case where other_cluster_distances is empty
+        if other_cluster_distances:
+            min_distance = np.min(other_cluster_distances)  # Compute minimum of other_cluster_distances
+        else:
+            min_distance = 0  # Default value when no other clusters exist
+        b.append(min_distance)  # Take the minimum average distance
+    b = np.array(b)
+    
+    return np.mean((b - a) / np.maximum(a, b))
+
+#External Evaluation using purity score
+from sklearn import metrics
+def purity_score(y_true, y_pred):
+    """Computes purity score for clustering."""
+    # Create a contingency matrix
+    contingency_matrix = metrics.cluster.contingency_matrix(y_true, y_pred)
+    
+    # Compute purity
+    purity = np.sum(np.amax(contingency_matrix, axis=0)) / np.sum(contingency_matrix)
+    return purity
